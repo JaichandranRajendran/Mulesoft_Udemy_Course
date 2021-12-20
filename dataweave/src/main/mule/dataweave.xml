@@ -1,0 +1,155 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<mule xmlns:http="http://www.mulesoft.org/schema/mule/http" xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core"
+	xmlns="http://www.mulesoft.org/schema/mule/core"
+	xmlns:doc="http://www.mulesoft.org/schema/mule/documentation" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd
+http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd">
+	<http:listener-config name="HTTP_Listener_config" doc:name="HTTP Listener config" doc:id="954cbc10-12cc-4ff1-aca3-921e690d7a04" >
+		<http:listener-connection host="localhost" port="8081" />
+	</http:listener-config>
+	<flow name="dataweave_basics" doc:id="32d11a66-32f9-45e4-909e-855d292dec13" >
+		<ee:transform doc:name="Concatenate two strings into a single strings" doc:id="9d23ecb5-a59b-40cf-a751-b6daebe04e90" >
+			<ee:message >
+				<ee:set-payload ><![CDATA[%dw 2.0
+output application/java
+---
+{
+	"newString" : ("hello" ++ " world")
+}]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+		<ee:transform doc:name="Conversion to XML" doc:id="42fca441-e26f-47b9-8cde-17bc43f3f512" >
+			<ee:message >
+				<ee:set-payload ><![CDATA[%dw 2.0
+output application/xml
+---
+{
+	"newString" : ("hello" ++ " world")
+}]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+		<ee:transform doc:name="Local variable" doc:id="cc154203-2183-42bc-a263-3aabe752be05" >
+			<ee:message >
+				<ee:set-payload ><![CDATA[%dw 2.0
+
+var myVar = {
+	"newString": ("Hello "++"world")
+}
+
+output application/java
+---
+myVar]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+		<ee:transform doc:name="Use DataWeave Native function" doc:id="344de0a3-97d0-4654-94d9-403f868d13a3" >
+			<ee:message >
+				<ee:set-payload ><![CDATA[%dw 2.0
+
+var myVar = {
+	
+	"sum" : sum([3,4,5,6,6,7,8]),
+	"avg" : avg([100,5])
+}
+
+output application/java
+---
+myVar]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+	</flow>
+	<flow name="dataweaveFlow" doc:id="d90a8495-6f5d-4139-bf9a-966283ddf9ad" >
+		<ee:transform doc:name="Read a file from content" doc:id="1b043f5c-6e0b-4184-8d04-d5db33af149d" >
+			<ee:message >
+				<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+---
+readUrl("classpath://peopleName.json")]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+		<ee:transform doc:name="Transform Message" doc:id="b9abff2a-490f-44c9-9f32-50620b45c51b" >
+			<ee:message >
+				<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+---
+payload]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+	</flow>
+	<flow name="dataweaveFlow1" doc:id="b9431f2a-6f85-43ac-8c8f-8e751744d320" >
+		<http:listener doc:name="Lambda basics" doc:id="57a2ca25-5c32-49ae-b118-12c874ae47f6" config-ref="HTTP_Listener_config" path="/lambdas" allowedMethods="POST"/>
+		<ee:transform doc:name="Declar and invoke the function" doc:id="94813d5c-6eab-4560-9286-5bfee6430a08" >
+			<ee:message >
+				<ee:set-payload ><![CDATA[%dw 2.0
+
+fun createString(obj) = {
+	description: obj.field1 ++ " " ++ obj.field2 ++ " " ++ obj.field3
+}
+
+output application/json
+---
+{
+	"root" : createString(payload)
+}]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+		<logger level="INFO" doc:name="Logger" doc:id="080dc42d-0a80-458f-9460-207bc0fb0b6c" message="#[payload]"/>
+		<ee:transform doc:name="Use Named Parameters in Lambda" doc:id="bbafcf00-9c4e-464d-af3f-8ab2cd41b56d" >
+			<ee:message >
+				<ee:set-payload ><![CDATA[%dw 2.0
+
+var customArray = [1,2,3,4,5,6]
+
+output application/json
+---
+{
+	"collection": customArray map ((number) ->(number*100))
+}]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+		<logger level="INFO" doc:name="Logger" doc:id="e0a6522a-22b5-4ba2-b5b2-24a026aa4eba" message="#[payload]"/>
+		<ee:transform doc:name="Use Lambda default arguments" doc:id="6be61a83-2ec9-42b4-902c-a5bebc2cc444" >
+			<ee:message >
+				<ee:set-payload ><![CDATA[%dw 2.0
+output application/java
+---
+{
+}]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+	</flow>
+	<flow name="Dataweave_Lambda_intermediate" doc:id="0e564430-da90-41c2-8fa4-3eff5b59a4de" >
+		<ee:transform doc:name="Map and merge fields and items" doc:id="538a06d0-32f4-4c5d-a743-1ac77a7b9ae4" >
+			<ee:message >
+				<ee:set-payload ><![CDATA[%dw 2.0
+
+var books  = [
+	{
+		bookId : 101,
+		title : "mulesoft course",
+		"price":"200"
+	},
+		{
+		bookId : 102,
+		title : "mulesoft course 2",
+		"price":"201"
+	},
+	
+		{
+		bookId : 103,
+		title : "mulesoft course 3",
+		"price":"202"
+	}
+	
+]
+
+
+output application/json
+---
+{
+	"bookResult" : books
+	}]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+	</flow>
+</mule>

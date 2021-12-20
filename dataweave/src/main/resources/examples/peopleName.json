@@ -1,0 +1,26 @@
+{
+  "people": {
+    "person" : {
+      "name":"Jai"
+    },
+    "person" : {
+      "name":"Jagadeesh"
+    },
+    "person" : {
+      "name":"Arun"
+    },
+    "person" : {
+      "name":"Srini"
+    },
+    "person" : {
+      "name":"Ashok"
+    },
+    "person" : {
+      "name":"Santhosh"
+    },
+    "person" : {
+      "name":"Rajesh"
+    }
+  }
+
+}
